@@ -81,11 +81,19 @@ var connection = mysql.createConnection({
           console.log(productID);
           console.log(orderQty);
           console.log(chosenProduct);
-          // if the validation in inquirer passes a productID value that we have in the database, do something
+          // Two layers of conditional:
+          // 1. If the validation in inquirer passes a productID value that we have in the database, do something
           if(chosenProduct !== undefined){
-
+            //if product chosen has sufficient quantity to fulfill the order
+            if(orderQty < chosenProduct.stock_quantity){
+                
+            }
+            
 
           }
+          // and later
+          //2. If the product id is actually present
+
           // if the validation in inquirer allows a number, but it is a number corresponding to a nonexistent product
           else{
             console.log("Sorry, this product ID does not exist in our database.")
