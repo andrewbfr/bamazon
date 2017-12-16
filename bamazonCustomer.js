@@ -76,30 +76,54 @@ var connection = mysql.createConnection({
               if(productID == allProducts[i].ID){
                   console.log(productID);
                   chosenProduct = allProducts[i];
+                  console.log(productID);
+                  console.log(orderQty);
+                  console.log(chosenProduct);
+              // Two layers of conditional:
+              // 1. If the validation in inquirer passes a productID value that we have in the database, do something
+                  if(chosenProduct !== undefined){
+                    //if product chosen has sufficient quantity to fulfill the order
+                    console.log("into conditional for validating if chosen product exists")
+                    if(orderQty < chosenProduct.stock_quantity){
+                      console.log("into conditional for verifying orderQty is less than stock_qty")
+                        updateProduct();
+                    }else{
+                      console.log(`\nSorry, we only have ${chosenProduct.stock_quantity} ${chosenProduct.product_name} available.\n`)
+                    }
+                  }
+              // and later
+              //2. If the product id is actually present
+              // if the validation in inquirer allows a number, but it is a number corresponding to a nonexistent product
+                    else{
+                      console.log("Sorry, this product ID does not exist in our database.")
+                      connection.end();
+                    }
               }
           }
-          console.log(productID);
-          console.log(orderQty);
-          console.log(chosenProduct);
-          // Two layers of conditional:
-          // 1. If the validation in inquirer passes a productID value that we have in the database, do something
-          if(chosenProduct !== undefined){
-            //if product chosen has sufficient quantity to fulfill the order
-            if(orderQty < chosenProduct.stock_quantity){
-                
-            }
-            
-
-          }
-          // and later
-          //2. If the product id is actually present
-
-          // if the validation in inquirer allows a number, but it is a number corresponding to a nonexistent product
-          else{
-            console.log("Sorry, this product ID does not exist in our database.")
-            connection.end();
-          }
+          
       })
+  };
+
+
+  //update conditionals to set "have" or "has" -- been ordered, where orderQty is > or < 1.
+  function updateProduct(){
+    console.log("\nUpdating stock...\n");
+    console.log(chosenProduct);
+    var updatedStock = chosenProduct.stock_quantity - orderQty;
+    // var query = connection.query(
+    //   'UPDATE products SET ? WHERE ?',
+    //   [
+    //     {
+    //       stock_quantity: updatedStock,
+    //     },
+    //     {
+    //       ID: chosenProduct
+    //     }
+    //   ], 
+    //   function(err,res) {
+    //     console.log(`Thanks. Your ${orderQty} ${chosenProduct.product_name} have been ordered.`);
+    //   }
+    // );
   };
 
   //sending queries to database & products table
