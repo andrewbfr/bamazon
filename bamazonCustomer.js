@@ -74,20 +74,40 @@ var connection = mysql.createConnection({
           // allProducts is the param passed into this function. It's full, quantified value is the "results" from the connection query when this function is called and results is passed into the initiateOrder() function.
           for (var i = 0; i < allProducts.length; i++){
               if(productID == allProducts[i].ID){
-                  console.log(productID);
+                  // console.log(productID);
                   chosenProduct = allProducts[i];
-                  console.log(productID);
-                  console.log(orderQty);
-                  console.log(chosenProduct);
+                  // console.log(orderQty);
+                  // console.log(chosenProduct);
               // Two layers of conditional:
               // 1. If the validation in inquirer passes a productID value that we have in the database, do something
                   if(chosenProduct !== undefined){
                     //if product chosen has sufficient quantity to fulfill the order
-                    console.log("into conditional for validating if chosen product exists")
+                    // console.log(chosenProduct + " is defined here 1");
+                    // console.log("into conditional for validating if chosen product exists")
                     if(orderQty < chosenProduct.stock_quantity){
-                      console.log("into conditional for verifying orderQty is less than stock_qty")
-                        updateProduct();
+                      // console.log("into conditional for verifying orderQty is less than stock_qty")
+                      // console.log(chosenProduct.product_name + " is defined here 2");
+                      console.log("\nUpdating stock...\n");
+                      // console.log(chosenProduct.product_name);
+                      var updatedStock = chosenProduct.stock_quantity - orderQty;
+                      console.log(updatedStock);
+                      //mega scoping issue. This works when the block of code is inside of this, but previously, chosenProduct variable was unavailable to the updateProduct() function. ....... not sure. it's working now so I'll leave it. I wonder if passing the allProducts into the updateProduct() and re-declaring chosenProduct somehow... but the allProducts[i] might also be limited. ARGHGHGHGHGH
+                      var query = connection.query(
+                        'UPDATE products SET ? WHERE ?',
+                        [
+                          {
+                            stock_quantity: updatedStock,
+                          },
+                          {
+                            ID: chosenProduct
+                          }
+                        ], 
+                        function(err,res) {
+                          console.log(`Thanks. Your ${orderQty} ${chosenProduct.product_name} have been ordered.`);
+                        }
+                      );
                     }else{
+                      // console.log(chosenProduct + " is defined here 3");
                       console.log(`\nSorry, we only have ${chosenProduct.stock_quantity} ${chosenProduct.product_name} available.\n`)
                     }
                   }
@@ -106,25 +126,26 @@ var connection = mysql.createConnection({
 
 
   //update conditionals to set "have" or "has" -- been ordered, where orderQty is > or < 1.
-  function updateProduct(){
-    console.log("\nUpdating stock...\n");
-    console.log(chosenProduct);
-    var updatedStock = chosenProduct.stock_quantity - orderQty;
-    // var query = connection.query(
-    //   'UPDATE products SET ? WHERE ?',
-    //   [
-    //     {
-    //       stock_quantity: updatedStock,
-    //     },
-    //     {
-    //       ID: chosenProduct
-    //     }
-    //   ], 
-    //   function(err,res) {
-    //     console.log(`Thanks. Your ${orderQty} ${chosenProduct.product_name} have been ordered.`);
-    //   }
-    // );
-  };
+  //commented out because it was causing scoping issues ---> not working.
+  // function updateProduct(){
+  //   console.log("\nUpdating stock...\n");
+  //   console.log(chosenProduct.product_name);
+  //   var updatedStock = chosenProduct.stock_quantity - orderQty;
+  //   var query = connection.query(
+  //     'UPDATE products SET ? WHERE ?',
+  //     [
+  //       {
+  //         stock_quantity: updatedStock,
+  //       },
+  //       {
+  //         ID: chosenProduct
+  //       }
+  //     ], 
+  //     function(err,res) {
+  //       console.log(`Thanks. Your ${orderQty} ${chosenProduct.product_name} have been ordered.`);
+  //     }
+  //   );
+  // };
 
   //sending queries to database & products table
   connection.query('SELECT * from products', function (error, results, fields) {
